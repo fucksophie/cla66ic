@@ -8,7 +8,7 @@ export class Player {
   private server: Server;
 
   username: string;
-
+  id: number;
   world = "main";
   position: Position;
   rotation: Rotation = { yaw: 0, pitch: 0 };
@@ -23,6 +23,14 @@ export class Player {
     this.username = username;
     this.position = position;
     this.server = server;
+
+    let id = Math.floor(Math.random() * 255);
+
+    // reassigns ID until finds available one
+    // if we reach 255 players this will loop forever
+    while(server.players.find(e => e.id == id)) id = Math.floor(Math.random() * 255);
+
+    this.id = id;
   }
 
   async writeToSocket(ar: Uint8Array) {
@@ -46,7 +54,7 @@ export class Player {
 
   async toWorld(world: World) {
     this.server.broadcastPacket(
-      (e) => PacketDefinitions.despawn(this.server.players.indexOf(this), e),
+      (e) => PacketDefinitions.despawn(this.id, e),
       this,
     );
 
@@ -56,11 +64,11 @@ export class Player {
 
     this.server.broadcastPacket(
       (e) =>
-        PacketDefinitions.spawn(this, this.server.players.indexOf(this), e),
+        PacketDefinitions.spawn(this, this.id, e),
       this,
     );
     this.server.broadcastPacket(
-      (e) => PacketDefinitions.spawn(e, this.server.players.indexOf(e), this),
+      (e) => PacketDefinitions.spawn(e, e.id, this),
       this,
     );
 

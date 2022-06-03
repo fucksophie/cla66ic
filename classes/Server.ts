@@ -134,14 +134,12 @@ export class Server {
 
     if (!player) return;
 
-    const index = this.players.indexOf(player);
-
     this.players = this.players.filter((e) => e != player);
 
     this.broadcast(`${player.username} has &cleft`);
     this.worlds.find((e) => e.name == player.world)!.save();
 
-    this.broadcastPacket((e) => PacketDefinitions.despawn(index, e), player);
+    this.broadcastPacket((e) => PacketDefinitions.despawn(player.id, e), player);
   }
   
   async handlePacket(packet: PacketReader, connection: Deno.Conn) {
@@ -216,7 +214,7 @@ export class Server {
       this.broadcastPacket((e) =>
         PacketDefinitions.movement(
           player,
-          this.players.indexOf(player),
+          player.id,
           e,
         ), player);
     } else if (packetType == 0x0d) {

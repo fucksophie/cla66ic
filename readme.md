@@ -34,7 +34,6 @@ your environment variables
 ### issues:
 1. plugin system event handling is lackluster in some palces
 2. tcp packet splitting fails sometimes
-3. the player-id implementation totally sucks!! it sometimes merges players together and soforth
-4. no cpe support! i want to get all of the above issues fixed before implementing CPE support
-5. proper rank support (implemented as plugin)
-6. no discord bridge (implemented as plugin)
+3. no cpe support! i want to get all of the above issues fixed before implementing CPE support
+4. proper rank support (implemented as plugin)
+5. no discord bridge (implemented as plugin)
