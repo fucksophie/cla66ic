@@ -1,4 +1,4 @@
-import { PacketDefinitions, Plugin, World } from "../classes/classes.ts";
+import { Plugin, World } from "../classes/classes.ts";
 import { Server } from "../classes/Server.ts";
 import { config } from "../deps.ts";
 
@@ -13,20 +13,16 @@ export default class CommandPlugin extends Plugin {
     super();
 
     this.server = server;
-    this.on("setblock", (player, _mode, _id, position, blockBefore) => {
+    this.on("setblock", (player, _mode, _id) => {
       const world = server.worlds.find((e) => e.name == player.world)!;
       if (!world.optionalJson?.builders?.includes("*")) {
         if (!world.optionalJson?.builders?.includes(player.username)) {
           player.message("You are %cnot allowed &fto build in this world!");
-          world.setBlock(position, blockBefore);
-
-          server.players.forEach(async (e) => {
-            if (e.world == player.world) {
-              await PacketDefinitions.setBlock(position, blockBefore, e);
-            }
-          });
+          return true;
         }
       }
+
+      return false;
     });
     this.on("command", async (command, player, args) => {
       if (command == "g") {

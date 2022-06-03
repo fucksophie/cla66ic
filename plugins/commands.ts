@@ -13,7 +13,7 @@ export default class CommandPlugin extends Plugin {
     super();
 
     this.server = server;
-    
+
     this.on("command", async (command, player) => {
       if (command == "help") {
         let allComamnds = "";

@@ -150,7 +150,6 @@ export class PacketDefinitions {
     await PacketDefinitions.levelFinish(world.size, player);
 
     await PacketDefinitions.spawn(player, -1, player);
-
   }
   static async levelFinish(size: Position, player: Player) {
     await player.writeToSocket(

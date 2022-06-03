@@ -28,7 +28,9 @@ export class Player {
 
     // reassigns ID until finds available one
     // if we reach 255 players this will loop forever
-    while(server.players.find(e => e.id == id)) id = Math.floor(Math.random() * 255);
+    while (server.players.find((e) => e.id == id)) {
+      id = Math.floor(Math.random() * 255);
+    }
 
     this.id = id;
   }
@@ -63,8 +65,7 @@ export class Player {
     PacketDefinitions.sendPackets(this, world);
 
     this.server.broadcastPacket(
-      (e) =>
-        PacketDefinitions.spawn(this, this.id, e),
+      (e) => PacketDefinitions.spawn(this, this.id, e),
       this,
     );
     this.server.broadcastPacket(

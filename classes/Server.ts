@@ -139,9 +139,12 @@ export class Server {
     this.broadcast(`${player.username} has &cleft`);
     this.worlds.find((e) => e.name == player.world)!.save();
 
-    this.broadcastPacket((e) => PacketDefinitions.despawn(player.id, e), player);
+    this.broadcastPacket(
+      (e) => PacketDefinitions.despawn(player.id, e),
+      player,
+    );
   }
-  
+
   async handlePacket(packet: PacketReader, connection: Deno.Conn) {
     const packetType = packet.readByte();
     if (packetType == 0x00) {
@@ -258,18 +261,25 @@ export class Server {
 
       const world = this.worlds.find((e) => e.name == player.world)!;
 
-      const before = world.getBlock(position);
+      let pluginAnswer: boolean[] = [];
 
-      this.worlds.find((e) => e.name == player.world)!.setBlock(position, id);
+      for await (const [_k, v] of this.plugins) {
+        pluginAnswer = pluginAnswer.concat(
+          await v.plugin.emit("setblock", player, mode, id, position),
+        );
+      }
+
+      if (pluginAnswer.some((e) => e == true)) {
+        PacketDefinitions.setBlock(position, world.getBlock(position), player);
+        return;
+      }
+
+      world.setBlock(position, id);
 
       this.broadcastPacket(
         (e) => PacketDefinitions.setBlock(position, id, e),
         player,
       );
-
-      this.plugins.forEach((value) => { // TODO: Rework this to work with proper block disabling (not resetting bullshit)
-        value.plugin.emit("setblock", player, mode, id, position, before);
-      });
     }
 
     if (packet.buffer.length - 1 >= packet.pos) { // TODO: This logic is wrong! Sometimes, TCP packets are still dropped. Need to rewrite this properly.
@@ -298,7 +308,6 @@ export class Server {
       } else {
         const packet = new PacketReader(buffer.subarray(0, count));
         this.handlePacket(packet, connection);
-        
       }
     }
   }
