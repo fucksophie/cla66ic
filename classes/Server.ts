@@ -291,7 +291,7 @@ export class Server {
   }
 
   async startSocket(connection: Deno.Conn) {
-    const buffer = new Uint8Array(2048);
+    const buffer = new Uint8Array(1024 * 1024 * 10);
 
     while (true) {
       let count;
