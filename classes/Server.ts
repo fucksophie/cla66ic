@@ -71,7 +71,7 @@ export class Server {
             "&public=True" +
             "&software=Cla66ic" + 
             `&version=7&salt=${config.hash}` +
-            `&users=${this.players.length}`,
+            `&users=${[...new Set(this.players.map(obj => obj.ip))].length}` 
         );
       }, 10000);
     }

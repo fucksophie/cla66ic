@@ -44,7 +44,7 @@ environment variables
 2. massive performance issues, running more than 100 something accounts makes the server instead insane amounts of cpu (most likely multithreading needed)
 3. no cpe support! i want to get all of the above issues fixed before
    implementing CPE support
-4. no IP cooldown connections (no block cooldown either), no anticheat, no unique IP heartbeats
+4. no IP cooldown connections (no block cooldown either), no anticheat
 5. proper rank support (implemented as plugin)
 6. no discord bridge (implemented as plugin)
 7. no cla66ic/plugins repository
