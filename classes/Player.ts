@@ -8,6 +8,7 @@ export class Player {
   private server: Server;
 
   username: string;
+  ip: string;
   id: number;
   world = "main";
   position: Position;
@@ -23,15 +24,15 @@ export class Player {
     this.username = username;
     this.position = position;
     this.server = server;
-
-    let id = Math.floor(Math.random() * 255);
+    this.ip = (this.socket.remoteAddr as Deno.NetAddr).hostname;
+    
+    let id = Math.floor(Math.random() * server.maxUsers);
 
     // reassigns ID until finds available one
-    // if we reach 255 players this will loop forever
-    while (server.players.find((e) => e.id == id)) {
-      id = Math.floor(Math.random() * 255);
-    }
 
+    while (server.players.find((e) => e.id == id)) {
+      id = Math.floor(Math.random() * server.maxUsers);
+    }
     this.id = id;
   }
 
@@ -54,7 +55,7 @@ export class Player {
     });
   }
 
-  async toWorld(world: World) {
+  toWorld(world: World) {
     this.server.broadcastPacket(
       (e) => PacketDefinitions.despawn(this.id, e),
       this,
@@ -75,6 +76,6 @@ export class Player {
 
     this.message("You have been moved.");
 
-    await world.save();
+    //await world.save(); TODO: this causes way too many issues
   }
 }
