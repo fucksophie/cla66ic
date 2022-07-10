@@ -37,9 +37,9 @@ export class Player {
   }
 
   async writeToSocket(ar: Uint8Array) {
-    await this.socket.write(ar).catch((e) => {
+    await this.socket.write(ar).catch(async (e) => {
       log.critical(e);
-      this.server.removeUser(this.socket);
+      await this.server.removeUser(this.socket);
     });
   }
 
@@ -75,7 +75,5 @@ export class Player {
     );
 
     this.message("You have been moved.");
-
-    //await world.save(); TODO: this causes way too many issues
   }
 }

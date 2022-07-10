@@ -26,9 +26,12 @@ export default class CommandPlugin extends Plugin {
     });
     this.on("command", async (command, player, args) => {
       if (command == "g") {
+        await server.worlds.find(e => e.name == player.world)!.save();
+
         const requestedWorld = server.worlds.find((e) =>
           e.name.toLowerCase() == args.join(" ").toLowerCase()
         );
+
         if (requestedWorld) {
           player.toWorld(requestedWorld);
         } else {

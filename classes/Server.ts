@@ -136,7 +136,7 @@ export class Server {
       }
     }
   }
-  removeUser(conn: Deno.Conn) {
+  async removeUser(conn: Deno.Conn) {
     const player = this.players.find((e) => e.socket == conn);
 
     if (!player) return;
@@ -151,6 +151,8 @@ export class Server {
 
     this.broadcast(`${player.username} has &cleft`);
 
+    await this.worlds.find(e => e.name == player.world)!.save();
+    
     this.broadcastPacket(
       (e) => PacketDefinitions.despawn(player.id, e),
       player,
@@ -314,7 +316,7 @@ export class Server {
       try {
         packetIDReadAttempt = await connection.read(packetID);
       } catch {
-        this.removeUser(connection); // TODO: add a reason to this
+        await this.removeUser(connection); // TODO: add a reason to this
         break;
       }
 
@@ -323,7 +325,7 @@ export class Server {
 
         if (!packetLength) {
           log.critical("Unknown Packet: " + packetID[0]);
-          this.removeUser(connection); // TODO: add a reason to this
+          await this.removeUser(connection); // TODO: add a reason to this
           break;
         }
 
@@ -333,21 +335,27 @@ export class Server {
         try {
           packetReadAttempt = await connection.read(rawPacket);
         } catch {
-          this.removeUser(connection); // TODO: add a reason to this
+          await this.removeUser(connection); // TODO: add a reason to this
           break;
         }
+
         let fullRead = packetReadAttempt!;
 
         while (fullRead < packetLength) {
           const halfPacket = new Uint8Array(packetLength - fullRead);
           rawPacket = new Uint8Array([...rawPacket, ...halfPacket]);
 
-          fullRead += (await connection.read(halfPacket))!;
+          try {
+            fullRead += (await connection.read(halfPacket))!;
+          } catch {
+            await this.removeUser(connection); // TODO: add a reason to this
+            break;
+          }
         }
 
         this.handlePacket(rawPacket, packetID[0], connection);
       } else {
-        this.removeUser(connection);
+        await this.removeUser(connection);
         break;
       }
     }
