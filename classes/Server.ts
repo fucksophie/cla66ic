@@ -152,7 +152,7 @@ export class Server {
     this.broadcast(`${player.username} has &cleft`);
 
     await this.worlds.find(e => e.name == player.world)!.save();
-    
+
     this.broadcastPacket(
       (e) => PacketDefinitions.despawn(player.id, e),
       player,
@@ -231,7 +231,8 @@ export class Server {
       player.toWorld(this.worlds.find((e) => e.name == player.world)!);
       this.broadcast(`${player.username} has &ajoined`);
     } else if (packetType == 0x08) {
-      const player = this.players.find((e) => e.socket == connection)!;
+      const player = this.players.find((e) => e.socket == connection);
+      if(!player) return;
 
       packet.readByte();
       player.position.x = packet.readShort();
@@ -248,7 +249,8 @@ export class Server {
     } else if (packetType == 0x0d) {
       packet.readByte();
 
-      const player = this.players.find((e) => e.socket == connection)!;
+      const player = this.players.find((e) => e.socket == connection);
+      if(!player) return;
       const message = packet.readString();
       let playerColor = "[member] &b";
 
@@ -272,7 +274,8 @@ export class Server {
       }
       this.broadcast(`${playerColor}${player.username}&f: ${message}`);
     } else if (packetType == 0x05) {
-      const player = this.players.find((e) => e.socket == connection)!;
+      const player = this.players.find((e) => e.socket == connection);
+      if(!player) return;
 
       const position = {
         x: packet.readShort(),
@@ -284,7 +287,8 @@ export class Server {
 
       const id = mode ? block : 0;
 
-      const world = this.worlds.find((e) => e.name == player.world)!;
+      const world = this.worlds.find((e) => e.name == player.world);
+      if(!world) return;
 
       let pluginAnswer: boolean[] = [];
 
