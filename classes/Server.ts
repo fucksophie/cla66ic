@@ -20,10 +20,16 @@ export class Server {
 
   players: Player[] = [];
   plugins: Map<string, PluginUpdateTime> = new Map();
-  lengthMap: Map<number, number> = new Map([[0, 131], [5, 9], [8, 10], [
-    13,
-    66,
-  ]]);
+
+  lengthMap: Map<number, number> = new Map([
+    [0, 130],
+    [5, 8],
+    [8, 9],
+    [13, 65],
+  ]);
+
+  maxUsers = 69
+  
   worlds: World[] = [new World({ x: 64, y: 64, z: 64 }, "main")];
 
   async start(port: number) {
@@ -60,9 +66,10 @@ export class Server {
         await fetch(
           "https://www.classicube.net/heartbeat.jsp" +
             `?port=${config.port}` +
-            "&max=255" +
+            `&max=${this.maxUsers}` +
             "&name=Cla66ic" +
             "&public=True" +
+            "&software=Cla66ic" + 
             `&version=7&salt=${config.hash}` +
             `&users=${this.players.length}`,
         );
@@ -136,8 +143,13 @@ export class Server {
 
     this.players = this.players.filter((e) => e != player);
 
+    try {
+      conn.close();
+    } catch {
+      // whatever
+    }
+
     this.broadcast(`${player.username} has &cleft`);
-    this.worlds.find((e) => e.name == player.world)!.save();
 
     this.broadcastPacket(
       (e) => PacketDefinitions.despawn(player.id, e),
@@ -145,14 +157,25 @@ export class Server {
     );
   }
 
-  async handlePacket(packet: PacketReader, connection: Deno.Conn) {
-    const packetType = packet.readByte();
+  async handlePacket(
+    buffer: Uint8Array,
+    packetType: number,
+    connection: Deno.Conn,
+  ) {
+    const packet = new PacketReader(buffer);
     if (packetType == 0x00) {
       if (this.players.find((e) => e.socket == connection)) return;
       packet.readByte();
       const username = packet.readString();
 
       const verification = packet.readString();
+
+      if(this.players.length >= this.maxUsers) {
+
+        connection.close();
+
+        return;
+      }
       const player = new Player(
         connection,
         username,
@@ -281,33 +304,51 @@ export class Server {
         player,
       );
     }
-
-    if (packet.buffer.length - 1 >= packet.pos) { // TODO: This logic is wrong! Sometimes, TCP packets are still dropped. Need to rewrite this properly.
-      this.handlePacket(packet, connection);
-
-      packet.pos += packet.totalPacketSize;
-      packet.totalPacketSize = 0;
-    }
   }
 
   async startSocket(connection: Deno.Conn) {
-    const buffer = new Uint8Array(1024 * 1024 * 10);
-
     while (true) {
-      let count;
+      const packetID = new Uint8Array(1);
+      let packetIDReadAttempt;
+
       try {
-        count = await connection.read(buffer);
-      } catch (e) {
-        count = 0;
-        log.critical(e);
+        packetIDReadAttempt = await connection.read(packetID);
+      } catch {
+        this.removeUser(connection); // TODO: add a reason to this
+        break;
       }
 
-      if (!count) {
+      if (packetIDReadAttempt) {
+        const packetLength = this.lengthMap.get(packetID[0]);
+
+        if (!packetLength) {
+          log.critical("Unknown Packet: " + packetID[0]);
+          this.removeUser(connection); // TODO: add a reason to this
+          break;
+        }
+
+        let rawPacket = new Uint8Array(packetLength);
+        let packetReadAttempt;
+
+        try {
+          packetReadAttempt = await connection.read(rawPacket);
+        } catch {
+          this.removeUser(connection); // TODO: add a reason to this
+          break;
+        }
+        let fullRead = packetReadAttempt!;
+
+        while (fullRead < packetLength) {
+          const halfPacket = new Uint8Array(packetLength - fullRead);
+          rawPacket = new Uint8Array([...rawPacket, ...halfPacket]);
+
+          fullRead += (await connection.read(halfPacket))!;
+        }
+
+        this.handlePacket(rawPacket, packetID[0], connection);
+      } else {
         this.removeUser(connection);
         break;
-      } else {
-        const packet = new PacketReader(buffer.subarray(0, count));
-        this.handlePacket(packet, connection);
       }
     }
   }

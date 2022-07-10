@@ -33,15 +33,18 @@ environment variables
 
 ### insipration taken from:
 
-1. mcgalaxy (obviuouuusly!!)
-2. https://github.com/Patbox/Cobblestone-Classic (some protocol information and
+1. https://github.com/Patbox/Cobblestone-Classic (some protocol information and
    worldhandling)
-3. cla55ic (world data too)
+2. cla55ic (world data too)
 
 ### issues:
 
-1. tcp packet splitting fails sometimes
-2. no cpe support! i want to get all of the above issues fixed before
+
+1. Properly queue up map saves instead of just blantantly saving whenever possible
+2. massive performance issues, running more than 100 something accounts makes the server instead insane amounts of cpu (most likely multithreading needed)
+3. no cpe support! i want to get all of the above issues fixed before
    implementing CPE support
-3. proper rank support (implemented as plugin)
-4. no discord bridge (implemented as plugin)
+4. no IP cooldown connections (no block cooldown either), no anticheat, no unique IP heartbeats
+5. proper rank support (implemented as plugin)
+6. no discord bridge (implemented as plugin)
+7. no cla66ic/plugins repository
