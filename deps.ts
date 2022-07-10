@@ -15,7 +15,7 @@ export const s3 = new ApiFactory({
     awsAccessKeyId: Deno.env.get("S3_ACCESS_KEY_ID")!,
     awsSecretKey: Deno.env.get("S3_SECRET_KEY")!,
   },
-  fixedEndpoint: "https://s3.us-west-004.backblazeb2.com",
+  fixedEndpoint: Deno.env.get("S3_ENDPOINT_URL"),
   region: "us-west-004",
 }).makeNew(S3);
 
