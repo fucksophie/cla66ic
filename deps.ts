@@ -24,4 +24,5 @@ export const config = {
   port: +Deno.env.get("PORT")!,
   hash: Deno.env.get("HASH"),
   onlineMode: Deno.env.get("ONLINEMODE") == "true",
+  main: Deno.env.get("MAIN") || "main",
 };

@@ -1,6 +1,6 @@
 import { Position, Rotation, World } from "./classes.ts";
 import { PacketDefinitions, PacketWriter } from "./Packets.ts";
-import { log } from "../deps.ts";
+import { config, log } from "../deps.ts";
 import { Server } from "./Server.ts";
 
 export class Player {
@@ -10,7 +10,7 @@ export class Player {
   username: string;
   ip: string;
   id: number;
-  world = "main";
+  world = config.main;
   position: Position;
   rotation: Rotation = { yaw: 0, pitch: 0 };
 
@@ -25,7 +25,7 @@ export class Player {
     this.position = position;
     this.server = server;
     this.ip = (this.socket.remoteAddr as Deno.NetAddr).hostname;
-    
+
     let id = Math.floor(Math.random() * server.maxUsers);
 
     // reassigns ID until finds available one

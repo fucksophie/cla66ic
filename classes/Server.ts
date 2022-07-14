@@ -28,9 +28,9 @@ export class Server {
     [13, 65],
   ]);
 
-  maxUsers = 69
-  
-  worlds: World[] = [new World({ x: 64, y: 64, z: 64 }, "main")];
+  maxUsers = 69;
+
+  worlds: World[] = [new World({ x: 64, y: 64, z: 64 }, config.main)];
 
   async start(port: number) {
     this.server = Deno.listen({ port: port });
@@ -52,7 +52,7 @@ export class Server {
     (await s3.listObjects({
       Bucket: "cla66ic",
     })).Contents.forEach((e) => {
-      if (e.Key !== "main.buf") {
+      if (e.Key !== config.main + ".buf") {
         log.info(`Autoloaded a world from s3! ${e.Key}`);
 
         const world = new World({ x: 0, y: 0, z: 0 }, e.Key!.split(".buf")[0]);
@@ -69,9 +69,9 @@ export class Server {
             `&max=${this.maxUsers}` +
             "&name=Cla66ic" +
             "&public=True" +
-            "&software=Cla66ic" + 
+            "&software=Cla66ic" +
             `&version=7&salt=${config.hash}` +
-            `&users=${[...new Set(this.players.map(obj => obj.ip))].length}` 
+            `&users=${[...new Set(this.players.map((obj) => obj.ip))].length}`,
         );
       }, 10000);
     }
@@ -151,7 +151,7 @@ export class Server {
 
     this.broadcast(`${player.username} has &cleft`);
 
-    await this.worlds.find(e => e.name == player.world)!.save();
+    await this.worlds.find((e) => e.name == player.world)!.save();
 
     this.broadcastPacket(
       (e) => PacketDefinitions.despawn(player.id, e),
@@ -172,8 +172,7 @@ export class Server {
 
       const verification = packet.readString();
 
-      if(this.players.length >= this.maxUsers) {
-
+      if (this.players.length >= this.maxUsers) {
         connection.close();
 
         return;
@@ -232,7 +231,7 @@ export class Server {
       this.broadcast(`${player.username} has &ajoined`);
     } else if (packetType == 0x08) {
       const player = this.players.find((e) => e.socket == connection);
-      if(!player) return;
+      if (!player) return;
 
       packet.readByte();
       player.position.x = packet.readShort();
@@ -250,7 +249,7 @@ export class Server {
       packet.readByte();
 
       const player = this.players.find((e) => e.socket == connection);
-      if(!player) return;
+      if (!player) return;
       const message = packet.readString();
       let playerColor = "[member] &b";
 
@@ -275,7 +274,7 @@ export class Server {
       this.broadcast(`${playerColor}${player.username}&f: ${message}`);
     } else if (packetType == 0x05) {
       const player = this.players.find((e) => e.socket == connection);
-      if(!player) return;
+      if (!player) return;
 
       const position = {
         x: packet.readShort(),
@@ -288,7 +287,7 @@ export class Server {
       const id = mode ? block : 0;
 
       const world = this.worlds.find((e) => e.name == player.world);
-      if(!world) return;
+      if (!world) return;
 
       let pluginAnswer: boolean[] = [];
 

@@ -7,6 +7,7 @@ export default class CommandPlugin extends Plugin {
     "g",
     "worlds",
     "world",
+    "main",
   ];
 
   constructor(server: Server) {
@@ -25,8 +26,14 @@ export default class CommandPlugin extends Plugin {
       return false;
     });
     this.on("command", async (command, player, args) => {
-      if (command == "g") {
-        await server.worlds.find(e => e.name == player.world)!.save();
+      if (command == "main") {
+        await server.worlds.find((e) => e.name == player.world)!.save();
+
+        player.toWorld(
+          server.worlds.find((e) => e.name.toLowerCase() == config.main)!,
+        );
+      } else if (command == "g") {
+        await server.worlds.find((e) => e.name == player.world)!.save();
 
         const requestedWorld = server.worlds.find((e) =>
           e.name.toLowerCase() == args.join(" ").toLowerCase()

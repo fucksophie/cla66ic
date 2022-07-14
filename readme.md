@@ -20,9 +20,11 @@ PORT=6969
 HASH=RandomHashIlIke
 OPS=["Me"]
 ONLINEMODE=true
+MAIN=main
 
 S3_ACCESS_KEY_ID="MyAccessKey"
 S3_SECRET_KEY="SecretKey"
+S3_ENDPOINT_URL="https://s3.us-west-004.backblazeb2.com"
 ```
 
 NOTE: if you are running inside of a cloud provider, just set these as your
@@ -39,9 +41,10 @@ environment variables
 
 ### issues:
 
-
-1. Properly queue up map saves instead of just blantantly saving whenever possible
-2. massive performance issues, running more than 100 something accounts makes the server instead insane amounts of cpu (most likely multithreading needed)
+1. Properly queue up map saves instead of just blantantly saving whenever
+   possible
+2. massive performance issues, running more than 100 something accounts makes
+   the server instead insane amounts of cpu (most likely multithreading needed)
 3. no cpe support! i want to get all of the above issues fixed before
    implementing CPE support
 4. no IP cooldown connections (no block cooldown either), no anticheat
