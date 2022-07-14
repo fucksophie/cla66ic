@@ -1,2 +1,5 @@
 .env
 .vscode
+plugins/*
+!plugins/commands.ts
+!plugins/world.ts

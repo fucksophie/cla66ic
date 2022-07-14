@@ -301,7 +301,7 @@ export class PacketDefinitions {
         .writeByte(0x07)
         .writeString(name)
         .writeString(motd)
-        .writeByte(0x00)
+        .writeByte(0x64)
         .toPacket(),
     );
   }

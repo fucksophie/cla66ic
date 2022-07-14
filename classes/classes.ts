@@ -29,7 +29,7 @@ export abstract class Plugin extends EventEmitter<{
     mode: number,
     id: number,
     position: Position,
-  ): boolean;
+  ): Promise<boolean> | boolean;
 
   stop(): void;
 }> {
