@@ -25,4 +25,7 @@ export const config = {
   hash: Deno.env.get("HASH"),
   onlineMode: Deno.env.get("ONLINEMODE") == "true",
   main: Deno.env.get("MAIN") || "main",
+  maxUsers: +(Deno.env.get("USERS") || 24) > 255 ? 255 : +(Deno.env.get("USERS") || 24),
+  software: Deno.env.get("SOFTWARE") || "Custom Cla66ic",
+  name: Deno.env.get("NAME") || "Cla66ic Server"
 };

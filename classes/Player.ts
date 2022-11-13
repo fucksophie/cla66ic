@@ -39,7 +39,10 @@ export class Player {
   async writeToSocket(ar: Uint8Array) {
     await this.socket.write(ar).catch(async (e) => {
       log.critical(e);
-      await this.server.removeUser(this.socket);
+      await this.server.removeUser(
+        this.socket,
+        "Write failed" + e.message.split("\n")[0],
+      );
     });
   }
 

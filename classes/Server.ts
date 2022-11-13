@@ -28,7 +28,7 @@ export class Server {
     [13, 65],
   ]);
 
-  maxUsers = 69;
+  maxUsers = config.maxUsers;
 
   worlds: World[] = [new World({ x: 64, y: 64, z: 64 }, config.main)];
 
@@ -67,9 +67,9 @@ export class Server {
           "https://www.classicube.net/heartbeat.jsp" +
             `?port=${config.port}` +
             `&max=${this.maxUsers}` +
-            "&name=Cla66ic" +
+            `&name=${config.name}` +
             "&public=True" +
-            "&software=Cla66ic" +
+            `&software=${config.software}` +
             `&version=7&salt=${config.hash}` +
             `&users=${[...new Set(this.players.map((obj) => obj.ip))].length}`,
         );
@@ -136,7 +136,7 @@ export class Server {
       }
     }
   }
-  async removeUser(conn: Deno.Conn) {
+  async removeUser(conn: Deno.Conn, text: string) {
     const player = this.players.find((e) => e.socket == conn);
 
     if (!player) return;
@@ -149,7 +149,7 @@ export class Server {
       // whatever
     }
 
-    this.broadcast(`${player.username} has &cleft`);
+    this.broadcast(`${player.username} has &cleft&f, "${text}"`);
 
     await this.worlds.find((e) => e.name == player.world)!.save();
 
@@ -319,7 +319,7 @@ export class Server {
       try {
         packetIDReadAttempt = await connection.read(packetID);
       } catch {
-        await this.removeUser(connection); // TODO: add a reason to this
+        await this.removeUser(connection, "Packet ID read failed");
         break;
       }
 
@@ -328,7 +328,7 @@ export class Server {
 
         if (!packetLength) {
           log.critical("Unknown Packet: " + packetID[0]);
-          await this.removeUser(connection); // TODO: add a reason to this
+          await this.removeUser(connection, "Unknown packet ID " + packetID[0]); // TODO: add a reason to this
           break;
         }
 
@@ -338,7 +338,7 @@ export class Server {
         try {
           packetReadAttempt = await connection.read(rawPacket);
         } catch {
-          await this.removeUser(connection); // TODO: add a reason to this
+          await this.removeUser(connection, "Packet read attempt failed."); // TODO: add a reason to this
           break;
         }
 
@@ -351,14 +351,20 @@ export class Server {
           try {
             fullRead += (await connection.read(halfPacket))!;
           } catch {
-            await this.removeUser(connection); // TODO: add a reason to this
+            await this.removeUser(
+              connection,
+              "Couldn't read all of packet " + packetID[0],
+            );
             break;
           }
         }
 
         this.handlePacket(rawPacket, packetID[0], connection);
       } else {
-        await this.removeUser(connection);
+        await this.removeUser(
+          connection,
+          "Packet ID read returned null. Packet " + packetID[0],
+        );
         break;
       }
     }
